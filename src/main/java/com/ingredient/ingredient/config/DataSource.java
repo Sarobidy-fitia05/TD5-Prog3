@@ -2,7 +2,6 @@ package com.ingredient.ingredient.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -21,9 +20,13 @@ public class DataSource {
 
     public Connection getConnection() {
         try {
+            // Force le chargement du driver PostgreSQL
+            Class.forName("org.postgresql.Driver");
             return DriverManager.getConnection(url, username, password);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Driver PostgreSQL manquant dans le projet (Vérifie Maven)", e);
         } catch (SQLException e) {
-            throw new RuntimeException("Impossible de se connecter à la base de données", e);
+            throw new RuntimeException("Erreur de connexion : " + e.getMessage(), e);
         }
     }
 
@@ -32,7 +35,7 @@ public class DataSource {
             try {
                 connection.close();
             } catch (SQLException e) {
-                throw new RuntimeException("Erreur lors de la fermeture de la connexion", e);
+                System.err.println("Erreur fermeture connexion : " + e.getMessage());
             }
         }
     }
